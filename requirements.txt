@@ -1,0 +1,5 @@
+addict
+scipy
+numpy
+pillow
+pycocotools
