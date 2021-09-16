@@ -72,10 +72,11 @@ def draw_bbox_keypoint(drawObj, ymin, xmin, ymax, xmax, keypoint, color, bd=1):
     drawObj.rectangle((xmin, ymax-bd, xmax, ymax), fill=color)
     drawObj.rectangle((xmin, ymin, xmin+bd, ymax), fill=color)
     drawObj.rectangle((xmax-bd, ymin, xmax, ymax), fill=color)
-    for i in range(len(keypoint)):
-        if int(keypoint[i][2]) == 2:
-            y, x = int(keypoint[i][0]), int(keypoint[i][1])
-            drawObj.ellipse((x-bd-1, y-bd-1, x+bd+1, y+bd+1), fill=COLOR_TABLE[i])
+    if keypoint is not None:
+        for i in range(len(keypoint)):
+            if int(keypoint[i][2]) == 2:
+                y, x = int(keypoint[i][0]), int(keypoint[i][1])
+                drawObj.ellipse((x-bd-1, y-bd-1, x+bd+1, y+bd+1), fill=COLOR_TABLE[i])
 
 
 def gaussian_radius(det_size, min_overlap=0.7):

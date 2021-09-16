@@ -107,7 +107,7 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         for i in range(select.shape[0]):
             i = int(select[i])
             box = bbox[i]
-            keypoint = keypoints[i]
+            keypoint = keypoints[i] if keypoints is not None else None
             draw_bbox_keypoint(drawObj, box[0], box[1], box[2], box[3], keypoint, color=COLOR_TABLE[i])
         if file_name is not None: img.save(file_name)
         else: img.show()
@@ -139,7 +139,8 @@ if __name__ == '__main__':
         b = random.randint(0, cfg.train.batch_size-1)
         hm, _ = torch.max(heatmap[b], dim=0)
         # hm = heatmap[b][0]
+        hm[hm!=1] = 0
         hm = hm.view(1,513,513).expand(3,513,513)
         dataset.show(img[b], {'bbox':bbox[b], 'keypoints':keypoints[b]})
-        dataset.show(hm, {'bbox':bbox[b], 'keypoints':keypoints[b]})
+        dataset.show(hm, {'bbox':bbox[b]})
         break
