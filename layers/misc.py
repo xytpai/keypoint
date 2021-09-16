@@ -160,3 +160,7 @@ def transfer_box_(
 def bilinear_interpolate(x, size, align=True):
     return F.interpolate(x, size=size, \
             mode='bilinear', align_corners=align)
+
+
+def bilinear_interpolate_as(x, template, align=True):
+    return bilinear_interpolate(x, (template.shape[2], template.shape[3]), align)

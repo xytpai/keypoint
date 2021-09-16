@@ -8,7 +8,9 @@ from .misc import conv_with_kaiming_uniform
 from .misc import box_iou
 from .misc import to_onehot, torch_select, torch_cat
 from .misc import transfer_box_
-from .misc import bilinear_interpolate
+from .misc import bilinear_interpolate, bilinear_interpolate_as
+
+from .losses import center_focal_loss
 
 __all__ = [
     'FrozenBatchNorm2d',
@@ -22,4 +24,7 @@ __all__ = [
     'torch_cat',
     'transfer_box_',
     'bilinear_interpolate',
+    'bilinear_interpolate_as',
+
+    'center_focal_loss',
 ]
