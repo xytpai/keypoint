@@ -52,13 +52,24 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         img, bbox, keypoints = resize_img(img, self.cfg.data.size, bbox, keypoints)
         img = transforms.ToTensor()(img)
         if self.cfg.data.norm_en: img = self.normalizer(img)
-        return img, bbox, keypoints
+        # heatmap
+        _, h, w = img.shape
+        heatmap = np.zeros((self.data_num_keypoints, h, w))
+        for i in range(keypoints.shape[0]):
+            ymin, xmin, ymax, xmax = bbox[i].tolist()
+            r = gaussian_radius((ymax-ymin, xmax-xmin))
+            for j in range(self.data_num_keypoints):
+                y, x, flag = keypoints[i, j].tolist()
+                if int(flag) == 2: heatmap[j] = \
+                    draw_umich_gaussian(heatmap[j], (round(y), round(x)), round(r))
+        return img, bbox, keypoints, torch.from_numpy(heatmap)
 
 
     def collate_fn(self, data):
-        img, bbox, keypoints = zip(*data)
+        img, bbox, keypoints, heatmap = zip(*data)
         batch_num = len(img)
         img = torch.stack(img)
+        heatmap = torch.stack(heatmap)
         max_n = 0
         for b in range(batch_num):
             if bbox[b].shape[0] > max_n: max_n = bbox[b].shape[0]
@@ -67,7 +78,7 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         for b in range(batch_num):
             bbox_t[b, :bbox[b].shape[0]] = bbox[b]
             keypoints_t[b, :keypoints[b].shape[0]] = keypoints[b]
-        return {'img':img, 'bbox':bbox_t, 'keypoints':keypoints_t}
+        return {'img':img, 'bbox':bbox_t, 'keypoints':keypoints_t, 'heatmap':heatmap}
 
     
     def transform_inference_img(self, img_pil):
@@ -120,10 +131,15 @@ if __name__ == '__main__':
     dataset = Dataset(cfg)
     loader = dataset.make_loader()
     for data in loader:
-        img, bbox, keypoints = data['img'], data['bbox'], data['keypoints']
+        img, bbox, keypoints, heatmap = data['img'], data['bbox'], data['keypoints'], data['heatmap']
         print('img:', img.shape)
         print('bbox:', bbox.shape)
         print('keypoints:', keypoints.shape)
+        print('heatmap:', heatmap.shape)
         b = random.randint(0, cfg.train.batch_size-1)
+        hm, _ = torch.max(heatmap[b], dim=0)
+        # hm = heatmap[b][0]
+        hm = hm.view(1,513,513).expand(3,513,513)
         dataset.show(img[b], {'bbox':bbox[b], 'keypoints':keypoints[b]})
+        dataset.show(hm, {'bbox':bbox[b], 'keypoints':keypoints[b]})
         break
