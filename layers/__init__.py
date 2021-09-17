@@ -9,6 +9,7 @@ from .misc import box_iou
 from .misc import to_onehot, torch_select, torch_cat
 from .misc import transfer_box_
 from .misc import bilinear_interpolate, bilinear_interpolate_as
+from .misc import peak_nms
 
 from .losses import center_focal_loss
 
@@ -25,6 +26,7 @@ __all__ = [
     'transfer_box_',
     'bilinear_interpolate',
     'bilinear_interpolate_as',
+    'peak_nms',
 
     'center_focal_loss',
 ]

@@ -163,4 +163,14 @@ def bilinear_interpolate(x, size, align=True):
 
 
 def bilinear_interpolate_as(x, template, align=True):
-    return bilinear_interpolate(x, (template.shape[2], template.shape[3]), align)
+    return F.interpolate(x, size=(template.shape[2], template.shape[3]), \
+            mode='bilinear', align_corners=align)
+
+
+def peak_nms(heat, kernel=3):
+    # heat: F(b, c, h, w)
+    pad = (kernel - 1) // 2
+    hmax = F.max_pool2d(
+        heat, (kernel, kernel), stride=1, padding=pad)
+    keep = (hmax == heat).float()
+    return heat * keep

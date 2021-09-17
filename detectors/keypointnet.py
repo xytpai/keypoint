@@ -45,8 +45,23 @@ class Detector(nn.Module):
             loss_ke = loss_ke_same + loss_ke_diff
             return 0.001 * loss_ke + 0.999 * loss_hm
         else:
-            peak = peak_det(out_hm) # (b, )
-
+            out_hm = peak_nms(out_hm.sigmoid()) # F(b, nk, oh, ow)
+            hm_score, hm_class = out_hm.max(dim=1) # F(b, oh, ow), L(b, oh, ow)
+            batch_idxs = torch.arange(batch_size, 
+                device=hm_score.device).view(-1, 1, 1).expand_as(hm_score)
+            hm_mask = hm_score > self.cfg.eval.threshold.heatmap
+            hm_class = hm_class[hm_mask] # L(n)
+            hm_score = hm_score[hm_mask] # F(n)
+            batch_idxs = batch_idxs[hm_mask] # L(n)
+            _, oh, ow = hm_score.shape
+            out_ke = out_ke.permute(0, 2, 3, 1).contiguous()
+            ft = out_ke[hm_mask] # F(n, f)
+            similarity = (ft.unsqueeze(1) - ft.unsqueeze(0))**2
+            similarity = similarity.mean(dim=2) # F(n,n)
+            return {
+                'class': hm_class,
+                'score': hm_score,
+                'similarity': similarity}
     
     def load_pretrained_params(self, path):
         self.load_state_dict(torch.load(path, map_location='cpu'))
