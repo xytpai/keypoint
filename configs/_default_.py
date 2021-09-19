@@ -3,7 +3,7 @@ cfg = Dict()
 
 cfg.mode = 'train'
 cfg.detector = 'keypointnet'
-cfg.weight_file = 'keypointnet.pth'
+cfg.weight_file = 'weights/keypointnet.pth'
 cfg.loss_def = "self.detector(data['img'], data['keypoints'], data['heatmap']).mean()"
 cfg.inf_def = "self.detector(img)"
 cfg.demo.root = 'images'

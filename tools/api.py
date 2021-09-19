@@ -8,7 +8,7 @@ def load_cfg(path_to_cfg):
     cfg_name = os.path.split(path_to_cfg)[1]
     cfg_name = cfg_name.split('.')[0]
     cfg = __import__('configs.'+cfg_name, fromlist=(cfg_name,)).cfg
-    cfg.name = path_to_cfg
+    cfg.name = cfg_name
     return cfg
 
 
@@ -52,7 +52,7 @@ def prepare_detector(cfg):
             if len(filtered_ckpt) == 0: latest_ckpt = None
             else: latest_ckpt = sorted(filtered_ckpt, reverse=True)[0]
             if latest_ckpt is not None:
-                detector = torch.load(latest_ckpt)
+                detector = torch.load(os.path.join('weights', latest_ckpt))
         detector = torch.nn.DataParallel(detector, device_ids=cfg.train.devices)
         detector = detector.cuda(cfg.train.devices[0])
         detector.train()
@@ -93,8 +93,12 @@ class Trainer(object):
         self.dataset = dataset
         self.loader = dataset.make_loader()
         self.opt = opt
-        self.step = self.detector.get('step', 0)
-        self.epoch = self.detector.get('epoch', 0)
+        try:
+            self.step = self.detector.module.step
+            self.epoch = self.detector.module.epoch
+        except:
+            self.step = 0
+            self.epoch = 0
         self.lr_base = cfg.train.lr_base
         self.lr_gamma = cfg.train.lr_gamma
         self.lr_schedule = cfg.train.lr_schedule
@@ -109,10 +113,10 @@ class Trainer(object):
                 self.detector.module.step = self.step
                 self.detector.module.epoch = self.epoch
                 torch.save(self.detector.module.state_dict(), self.cfg.weight_file)
-                torch.save(self.detector.module, 'weights/'+self.cfg.name+'_'+str(self.step)+'.ckpt')
+                torch.save(self.detector.module, 'weights/'+self.cfg.name+'_'+str(self.step).zfill(12)+'.ckpt')
             return True
         self.detector.train()
-        self.detector.module.backbone.freeze_stages(int(self.cfg.train.freeze_stages))
+        self.detector.module.backbone.freeze_stages(int(self.cfg.train.backbone.freeze_stages))
         if self.cfg.train.backbone.freeze_bn: self.detector.module.backbone.freeze_bn()
         # loop        
         for i, data in enumerate(self.loader):
@@ -136,8 +140,6 @@ class Trainer(object):
             self.opt.zero_grad()          
             loss = eval(self.cfg.loss_def)
             loss.backward()
-            if self.grad_clip > 0:
-                torch.nn.utils.clip_grad_norm_(self.detector.parameters(), self.grad_clip)
             self.opt.step()
             maxmem = int(torch.cuda.max_memory_allocated(device=\
                 self.device[0]) / 1024 / 1024)
@@ -148,10 +150,10 @@ class Trainer(object):
             self.step += 1
         self.epoch += 1
         if self.save:
-                self.detector.module.step = self.step
-                self.detector.module.epoch = self.epoch
-                torch.save(self.detector.module.state_dict(), self.cfg.weight_file)
-                torch.save(self.detector.module, 'weights/'+self.cfg.name+'_'+str(self.step)+'.ckpt')
+            self.detector.module.step = self.step
+            self.detector.module.epoch = self.epoch
+            torch.save(self.detector.module.state_dict(), self.cfg.weight_file)
+            torch.save(self.detector.module, 'weights/'+self.cfg.name+'_'+str(self.step).zfill(12)+'.ckpt')
         return False
 
 
