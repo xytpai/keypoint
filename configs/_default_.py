@@ -45,6 +45,8 @@ cfg.train.save = True
 
 # eval
 cfg.eval.device = 0
+cfg.eval.threshold.heatmap = 0.5
 
 # test
 cfg.test.device = 0
+cfg.test.threshold.heatmap = 0.5

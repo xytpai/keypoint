@@ -13,16 +13,20 @@ def load_cfg(path_to_cfg):
 
 
 def parse_cfg(argv):
+    def trans_option(option):
+        options = option.split('=')
+        option_ = options[0] + '="' + options[1] + '"'
+        return option_
     cfg = None
     for option in argv:
         if option.startswith('cfg='):
             cfg = load_cfg(option.split('=')[1].strip())
         elif option.startswith('cfg.'):
+            if option.split('=')[1].strip() in ['eval', 'train', 'test']:
+                exec(trans_option(option))
+                continue
             try: exec(option)
-            except:
-                options = option.split('=')
-                option_ = options[0] + '="' + options[1] + '"'
-                exec(option_)
+            except: exec(trans_option(option))
     return cfg
 
 

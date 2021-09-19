@@ -32,7 +32,7 @@ class Detector(nn.Module):
             hm_score, hm_class = out_hm.max(dim=1) # F(b, oh, ow), L(b, oh, ow)
             batch_indexs = torch.arange(batch_size, 
                 device=hm_score.device).view(-1, 1, 1).expand_as(hm_score)
-            hm_mask = hm_score > self.cfg.eval.threshold.heatmap
+            hm_mask = hm_score > eval('self.cfg.'+self.mode+'.threshold.heatmap')
             hm_class = hm_class[hm_mask] # L(n)
             hm_score = hm_score[hm_mask] # F(n)
             batch_indexs = batch_indexs[hm_mask] # L(n)
