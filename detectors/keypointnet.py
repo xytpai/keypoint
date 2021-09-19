@@ -12,11 +12,9 @@ class Detector(nn.Module):
         super().__init__()
         self.cfg = cfg
         self.register_buffer('trained_log', torch.zeros(2).long())
-        self.backbone = ResNet(cfg.model.backbone.depth, cfg.model.num_class)
-        self.neck = FusionFPN(cfg.model.backbone.out_channels, cfg.model.head.channels)
-        self.head_hm = ConvHead4(cfg.model.head.channels, cfg.model.num_keypoints)
-        self.head_ke = ConvHead4(cfg.model.head.channels, cfg.model.num_keypoints)
-        self.loss_func = nn.CrossEntropyLoss()
+        self.backbone = ResNet(depth=cfg.model.backbone.depth)
+        self.neck = FusionFPN(self.backbone.out_channels, cfg.model.head.channels)
+        self.head = ConvHead4(cfg.model.head.channels, cfg.model.num_keypoints)
         if cfg.mode == 'train' and cfg.train.load_pretrained_backbone:
             self.backbone.load_pretrained_params()
         
