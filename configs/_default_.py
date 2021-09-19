@@ -10,6 +10,7 @@ cfg.demo.root = 'images'
 
 # data
 cfg.data.norm = [(0.485,0.456,0.406), (0.229,0.224,0.225)]
+cfg.data.num_keypoints = 17
 
 # dataset
 cfg.dataset.name = 'mscoco_keypoints'
@@ -19,7 +20,7 @@ cfg.dataset.train_json = 'images/person_keypoints_mini.json'
 # model
 cfg.model.backbone.depth = 50
 cfg.model.head.channels = 128
-cfg.model.num_keypoints = 17
+cfg.model.num_keypoints = 17 # same as cfg.data.num_keypoints
 
 # train
 cfg.train.backbone.pretrained = True
