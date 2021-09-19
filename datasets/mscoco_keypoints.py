@@ -87,7 +87,7 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         img = transforms.ToTensor()(img_pil)
         if self.cfg.data.norm_en: img = self.normalizer(img)
         img = img.unsqueeze(0)
-        return img
+        return img, _
     
     def make_loader(self):
         batch_size = self.cfg.train.batch_size
@@ -117,8 +117,6 @@ if __name__ == '__main__':
     from addict import Dict
 
     cfg = Dict()
-    cfg.task = "person_keypoints"
-    cfg.loss_def = "self.detector(data['img'], data['bbox'], data['labels'], data['keypoints']).mean()"
     cfg.data.num_keypoints = 17
     cfg.data.norm = [(0.485,0.456,0.406), (0.229,0.224,0.225)]
     cfg.data.norm_en = False

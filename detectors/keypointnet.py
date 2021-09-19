@@ -2,16 +2,15 @@ import torch
 import torch.nn as nn 
 import torch.nn.functional as F 
 from layers import *
-from detectors.backbones import *
-from detectors.necks import *
-from detectors.heads import *
+from .backbones import *
+from .necks import *
+from .heads import *
 
 
 class Detector(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        self.register_buffer('trained_log', torch.zeros(2).long())
         self.backbone = ResNet(depth=cfg.model.backbone.depth)
         self.neck = FusionFPN(self.backbone.out_channels, cfg.model.head.channels)
         self.head = ConvHead4(cfg.model.head.channels, cfg.model.num_keypoints)

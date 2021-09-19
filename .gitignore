@@ -1,3 +1,4 @@
+__pycache__
 detectors/backbones/__pycache__
 detectors/necks/__pycache__
 detectors/heads/__pycache__
@@ -5,3 +6,5 @@ detectors/__pycache__
 layers/__pycache__
 datasets/__pycache__
 tools/__pycache__
+configs/__pycache__
+weights/*.ckpt
