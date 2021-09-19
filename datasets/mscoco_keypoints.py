@@ -121,9 +121,9 @@ if __name__ == '__main__':
     cfg.data.norm = [(0.485,0.456,0.406), (0.229,0.224,0.225)]
     cfg.data.norm_en = False
     cfg.data.size = 513
-    cfg.dataset.train_root = '/home/xytpai/dataset/mscoco/val2017'
-    cfg.dataset.train_json = '/home/xytpai/dataset/mscoco/person_keypoints_val2017.json'
-    cfg.train.batch_size=2
+    cfg.dataset.train_root = '../images'
+    cfg.dataset.train_json = '../images/person_keypoints_mini.json'
+    cfg.train.batch_size=1
     cfg.train.num_workers=0
 
     dataset = Dataset(cfg)
