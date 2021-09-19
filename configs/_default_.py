@@ -11,6 +11,8 @@ cfg.demo.root = 'images'
 # data
 cfg.data.norm = [(0.485,0.456,0.406), (0.229,0.224,0.225)]
 cfg.data.num_keypoints = 17
+cfg.data.norm_en = True
+cfg.data.size = 513
 
 # dataset
 cfg.dataset.name = 'mscoco_keypoints'
@@ -23,6 +25,8 @@ cfg.model.head.channels = 128
 cfg.model.num_keypoints = 17 # same as cfg.data.num_keypoints
 
 # train
+cfg.train.batch_size = 1
+cfg.train.num_workers = 0
 cfg.train.backbone.pretrained = True
 cfg.train.backbone.freeze_bn = True
 cfg.train.backbone.freeze_stages = 1
