@@ -12,6 +12,20 @@ def load_cfg(path_to_cfg):
     return cfg
 
 
+def parse_cfg(argv):
+    cfg = None
+    for option in argv:
+        if option.startswith('cfg='):
+            cfg = load_cfg(option.split('=')[1].strip())
+        elif option.startswith('cfg.'):
+            try: exec(option)
+            except:
+                options = option.split('=')
+                option_ = options[0] + '="' + options[1] + '"'
+                exec(option_)
+    return cfg
+
+
 def prepare_device(cfg):
     if cfg.mode == 'train':
         torch.cuda.set_device(cfg.train.devices[0])

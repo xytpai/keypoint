@@ -1,16 +1,15 @@
 import os, sys
 sys.path.append(os.getcwd())
-from .api import *
+from api import *
 from PIL import Image
-for option in sys.argv:
-    if option.startswith('cfg='):
-        cfg = load_cfg(option.split('=')[1].strip())
-    elif option.startswith('cfg.'): exec(option)
+print('loading cfg ...')
+cfg = parse_cfg(sys.argv)
+print(cfg)
 demo_dir = cfg.demo.root
 
 prepare_device(cfg)
 detector = prepare_detector(cfg)
-dataset = prepare_dataset(cfg, detector)
+dataset = prepare_dataset(cfg)
 inferencer = Inferencer(cfg, detector, dataset)
 
 for filename in os.listdir(demo_dir):

@@ -6,15 +6,15 @@ cfg.detector = 'keypointnet'
 cfg.weight_file = 'keypointnet.pth'
 cfg.loss_def = "self.detector(data['img'], data['keypoints'], data['heatmap']).mean()"
 cfg.inf_def = "self.detector(img)"
-cfg.demo.root = './images'
+cfg.demo.root = 'images'
 
 # data
 cfg.data.norm = [(0.485,0.456,0.406), (0.229,0.224,0.225)]
 
 # dataset
 cfg.dataset.name = 'mscoco_keypoints'
-cfg.dataset.train_root = ''
-cfg.dataset.train_json = ''
+cfg.dataset.train_root = 'images'
+cfg.dataset.train_json = 'images/person_keypoints_mini.json'
 
 # model
 cfg.model.backbone.depth = 50
