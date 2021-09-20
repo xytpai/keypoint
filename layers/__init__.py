@@ -10,6 +10,7 @@ from .misc import to_onehot, torch_select, torch_cat
 from .misc import transfer_box_
 from .misc import bilinear_interpolate, bilinear_interpolate_as
 from .misc import peak_nms
+from .misc import aligned_mesh2d
 
 from .losses import center_focal_loss
 
@@ -27,6 +28,7 @@ __all__ = [
     'bilinear_interpolate',
     'bilinear_interpolate_as',
     'peak_nms',
+    'aligned_mesh2d',
 
     'center_focal_loss',
 ]

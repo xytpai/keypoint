@@ -23,7 +23,8 @@ class Detector(nn.Module):
         # heatmap: F(b, nk, im_h, im_w)
         batch_size, _, im_h, im_w = imgs.shape
         out_hm = self.head(self.neck(self.backbone(imgs))).sigmoid()
-        if kepoints is not None and heatmap is not None:
+        _, _, oh, ow = out_hm.shape
+        if heatmap is not None:
             heatmap = bilinear_interpolate_as(heatmap, out_hm)
             loss_hm = center_focal_loss(out_hm, heatmap)
             return loss_hm
@@ -32,14 +33,18 @@ class Detector(nn.Module):
             hm_score, hm_class = out_hm.max(dim=1) # F(b, oh, ow), L(b, oh, ow)
             batch_indexs = torch.arange(batch_size, 
                 device=hm_score.device).view(-1, 1, 1).expand_as(hm_score)
-            hm_mask = hm_score > eval('self.cfg.'+self.mode+'.threshold.heatmap')
-            hm_class = hm_class[hm_mask] # L(n)
-            hm_score = hm_score[hm_mask] # F(n)
-            batch_indexs = batch_indexs[hm_mask] # L(n)
+            mesh = aligned_mesh2d(im_h, im_w, oh, ow, batch_size, hm_score.device)
+            hm_mask = hm_score > eval('self.cfg.'+self.cfg.mode+'.threshold.heatmap')
+            hm_class_selected = hm_class[hm_mask] # L(n)
+            hm_score_selected = hm_score[hm_mask] # F(n)
+            center_selected = mesh[hm_mask] # F(n, 2)
+            batch_indexs_selected = batch_indexs[hm_mask] # L(n)
             return {
-                'class': hm_class,
-                'score': hm_score,
-                'index': batch_indexs}
+                'heatmap': bilinear_interpolate_as(hm_score.unsqueeze(1), imgs)[:, 0],
+                'class': hm_class_selected,
+                'score': hm_score_selected,
+                'center': center_selected,
+                'index': batch_indexs_selected}
     
     def load_pretrained_params(self, path):
         self.load_state_dict(torch.load(path, map_location='cpu'))

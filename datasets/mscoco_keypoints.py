@@ -64,7 +64,6 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
                     draw_umich_gaussian(heatmap[j], (round(y), round(x)), round(r))
         return img, bbox, keypoints, torch.from_numpy(heatmap)
 
-
     def collate_fn(self, data):
         img, bbox, keypoints, heatmap = zip(*data)
         batch_num = len(img)
@@ -79,7 +78,6 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
             bbox_t[b, :bbox[b].shape[0]] = bbox[b]
             keypoints_t[b, :keypoints[b].shape[0]] = keypoints[b]
         return {'img':img, 'bbox':bbox_t, 'keypoints':keypoints_t, 'heatmap':heatmap}
-
     
     def transform_inference_img(self, img_pil):
         if img_pil.mode != 'RGB': img_pil = img_pil.convert('RGB')
@@ -98,17 +96,23 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         if not isinstance(img, Image.Image):
             img = transforms.ToPILImage()(img)
         bbox, keypoints = pred.get('bbox', None), pred.get('keypoints', None)
-         # sort
-        hw = bbox[:, 2:] - bbox[:, :2]
-        area = hw[:, 0] * hw[:, 1] # N
-        select = area.sort(descending=True)[1] # L(n)
-        # draw
-        drawObj = ImageDraw.Draw(img)
-        for i in range(select.shape[0]):
-            i = int(select[i])
-            box = bbox[i]
-            keypoint = keypoints[i] if keypoints is not None else None
-            draw_bbox_keypoint(drawObj, box[0], box[1], box[2], box[3], keypoint, color=COLOR_TABLE[i])
+        if bbox is not None:
+            # sort
+            hw = bbox[:, 2:] - bbox[:, :2]
+            area = hw[:, 0] * hw[:, 1] # N
+            select = area.sort(descending=True)[1] # L(n)
+            # draw
+            drawObj = ImageDraw.Draw(img)
+            for i in range(select.shape[0]):
+                i = int(select[i])
+                box = bbox[i]
+                keypoint = keypoints[i] if keypoints is not None else None
+                draw_bbox_keypoint(drawObj, (box[0], box[1], box[2], box[3]), keypoint, color=COLOR_TABLE[i])
+        else:
+            drawObj = ImageDraw.Draw(img)
+            for i in range(keypoints.shape[0]):
+                keypoint = keypoints[i] if keypoints is not None else None
+                draw_bbox_keypoint(drawObj, None, keypoint, color=COLOR_TABLE[i])
         if file_name is not None: img.save(file_name)
         else: img.show()
 

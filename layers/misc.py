@@ -174,3 +174,11 @@ def peak_nms(heat, kernel=3):
         heat, (kernel, kernel), stride=1, padding=pad)
     keep = (hmax == heat).float()
     return heat * keep
+
+
+def aligned_mesh2d(im_h, im_w, oh, ow, batch_size, device):
+    y = torch.linspace(0, oh-1, oh, device=device) * float(im_h-1)/(oh-1)
+    x = torch.linspace(0, ow-1, ow, device=device) * float(im_w-1)/(ow-1)
+    gx, gy = torch.meshgrid(x, y)
+    mesh = torch.stack([gy, gx], dim=-1) # F(oh, ow, 2)
+    return mesh.unsqueeze(0).expand(batch_size, oh, ow, 2)

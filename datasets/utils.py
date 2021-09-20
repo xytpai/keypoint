@@ -66,12 +66,13 @@ COLOR_TABLE = [
 ] * 100
 
 
-def draw_bbox_keypoint(drawObj, ymin, xmin, ymax, xmax, keypoint, color, bd=1):
-    pass
-    drawObj.rectangle((xmin, ymin, xmax, ymin+bd), fill=color)
-    drawObj.rectangle((xmin, ymax-bd, xmax, ymax), fill=color)
-    drawObj.rectangle((xmin, ymin, xmin+bd, ymax), fill=color)
-    drawObj.rectangle((xmax-bd, ymin, xmax, ymax), fill=color)
+def draw_bbox_keypoint(drawObj, bbox, keypoint, color, bd=1):
+    if bbox is not None:
+        ymin, xmin, ymax, xmax = bbox
+        drawObj.rectangle((xmin, ymin, xmax, ymin+bd), fill=color)
+        drawObj.rectangle((xmin, ymax-bd, xmax, ymax), fill=color)
+        drawObj.rectangle((xmin, ymin, xmin+bd, ymax), fill=color)
+        drawObj.rectangle((xmax-bd, ymin, xmax, ymax), fill=color)
     if keypoint is not None:
         for i in range(len(keypoint)):
             if int(keypoint[i][2]) == 2:
