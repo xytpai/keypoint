@@ -7,6 +7,7 @@ import torchvision.transforms as transforms
 import random
 import numpy as np
 from PIL import Image, ImageDraw
+from matplotlib import pyplot as plt
 if __name__ != '__main__':
     from datasets.utils import *
 else:
@@ -96,25 +97,16 @@ class Dataset(torchvision.datasets.coco.CocoDetection):
         if not isinstance(img, Image.Image):
             img = transforms.ToPILImage()(img)
         bbox, keypoints = pred.get('bbox', None), pred.get('keypoints', None)
-        if bbox is not None:
-            # sort
-            hw = bbox[:, 2:] - bbox[:, :2]
-            area = hw[:, 0] * hw[:, 1] # N
-            select = area.sort(descending=True)[1] # L(n)
-            # draw
-            drawObj = ImageDraw.Draw(img)
-            for i in range(select.shape[0]):
-                i = int(select[i])
-                box = bbox[i]
-                keypoint = keypoints[i] if keypoints is not None else None
-                draw_bbox_keypoint(drawObj, (box[0], box[1], box[2], box[3]), keypoint, color=COLOR_TABLE[i])
-        else:
-            drawObj = ImageDraw.Draw(img)
-            for i in range(keypoints.shape[0]):
-                keypoint = keypoints[i] if keypoints is not None else None
-                draw_bbox_keypoint(drawObj, None, keypoint, color=COLOR_TABLE[i])
-        if file_name is not None: img.save(file_name)
-        else: img.show()
+        keypoints = torch.stack([keypoints[:, :, 1], keypoints[:, :, 0], keypoints[:, :, 2]], dim=-1)
+        plt.axis('off')
+        plt.imshow(img)
+        annos = []
+        for i in range(keypoints.shape[0]):
+            annos.append({"keypoints": keypoints[i].view(-1).tolist(), "category_id": 1})
+        self.coco.showAnns(annos)
+        plt.tight_layout()
+        if file_name is None: plt.show()
+        else: plt.savefig(file_name)
 
 
 if __name__ == '__main__':
@@ -144,5 +136,5 @@ if __name__ == '__main__':
         hm[hm!=1] = 0
         hm = hm.view(1,513,513).expand(3,513,513)
         dataset.show(img[b], {'bbox':bbox[b], 'keypoints':keypoints[b]})
-        dataset.show(hm, {'bbox':bbox[b]})
+        # dataset.show(hm, {'bbox':bbox[b]})
         break
